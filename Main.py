@@ -1,7 +1,6 @@
 import os
 import socket
 import argparse
-from itertools import groupby
 
 # Function to ping a domain
 def ping_domain(domain):
@@ -17,15 +16,9 @@ def ping_domain(domain):
 # Function to ping the console of a host
 def ping_console_host(host):
     try:
-        # Use the 'ping' command to check the reachability of the host
-        response_host = os.system(f"ping {host}")
-        if response_host != 0:
-            print(f"{host} is not reachable.")
-            return
-
         # Use the 'ping' command to check the reachability of the console
-        response_console = os.system(f"ping {host}")
-        if response_console == 0:
+        response = os.system(f"ping {host}")
+        if response == 0:
             print(f"Console of {host} is reachable.")
         else:
             print(f"Console of {host} is not reachable.")
@@ -33,56 +26,15 @@ def ping_console_host(host):
         # Handle any errors that may occur during console ping
         print(f"An error occurred while pinging console of {host}. Error: {e}")
 
-# Function to add the "-con" prefix after the numbers in the middle of a host
-def add_console_prefix_in_middle(host):
-    # Split the host into parts based on numbers
-    parts = ["".join(g) for k, g in groupby(host, str.isdigit)]
-
-    if len(parts) > 1:
-        # Insert "-con" after the numbers in the middle
-        middle_index = len(parts) // 2
-        parts[middle_index] = f"{parts[middle_index]}-con"
-        return '.'.join(parts)
-    else:
-        # Check if there are numbers at the end, and insert "-con" before the dot
-        index_dot = host.rfind('.')
-        if index_dot != -1 and host[index_dot+1:].isdigit():
-            return f"{host[:index_dot]}-con{host[index_dot:]}"
-        else:
-            return f"{host}-con"
-
 if __name__ == "__main__":
-    # Set up the argument parser
-    parser = argparse.ArgumentParser(description="Ping a domain and optionally the console of a host.")
-    # Define command-line arguments
-    parser.add_argument("domain", nargs='?', help="Domain to ping")
-    parser.add_argument("-con", "--console", help="Ping the console of the specified host", metavar="host")
+    # Prompt the user to enter domains
+    domains_input = input("Enter domains separated by space: ")
+    domains = domains_input.split()
 
-    # Parse the command-line arguments
-    args = parser.parse_args()
+    # Ping the provided domains or hostnames
+    for domain in domains:
+        ping_domain(domain)
 
-    # Check if neither domain nor console is provided
-    if not args.domain and not args.console:
-        # Prompt the user to enter a domain
-        domain_to_ping = input("Enter the domain to ping: ")
-        # Ping the entered domain
-        ping_domain(domain_to_ping)
-    else:
-        # Use the provided domain or console argument
-        host_to_ping = args.domain or args.console
-        # Ping the domain or console
-        if args.domain:
-            ping_domain(host_to_ping)
-        else:
-            # Add the "-con" prefix after the numbers in the middle of the console host
-            console_host_with_prefix = add_console_prefix_in_middle(host_to_ping)
-            # Ping the console of the specified host
-            ping_console_host(console_host_with_prefix)
-
-    # Additional section to ping console after host
-    if args.console:
-        console_host = args.console
-        # Add the "-con" prefix after the numbers in the middle of the console host
-        console_host_with_prefix = add_console_prefix_in_middle(console_host)
-        # Ping the console of the specified host
-        ping_console_host(console_host_with_prefix)
+        # Create the console host by appending "-con"
+        console_host = f"{domain.split('.')[0]}-con.{domain.split('.', 1)[1]}"
+        ping_console_host(console_host)
