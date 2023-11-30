@@ -1,15 +1,11 @@
 # Host-Console-Merge Python Script
+# This script is designed to gather information about hosts and consoles in a Python environment.
 
+# Usage Example:
+# Run the script using the following command, providing a fully qualified domain name as an argument:
+#   python htcon.py {fully qualified domain name}
 
-# This repo will be used to develope a script in python primarly focued on python. The Focus of this Project is to be able to gather individual host and console ip of specific nodes. 
-
-## EXAMPLE   
-
-htcon.py {fully qualified domain name}
-
-
-## output
-
-ping Host IP
-
-ping console IP
+# Output:
+# The script will output the following information:
+#   - Ping result for the Host IP.
+#   - Ping result for the Console IP.
