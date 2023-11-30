@@ -26,6 +26,27 @@ def ping_console_host(host):
         # Handle any errors that may occur during console ping
         print(f"An error occurred while pinging console of {host}. Error: {e}")
 
+# Function to add the "-con" prefix after the numbers in the middle of a host
+def add_console_prefix_in_middle(host):
+    # Split the host into parts based on numbers
+    parts = ["".join(g) for k, g in groupby(host, str.isdigit)]
+
+    if len(parts) > 1:
+        # Insert "-con" after the numbers in the middle
+        middle_index = len(parts) // 2
+        parts[middle_index] = f"{parts[middle_index]}-con"
+        return '.'.join(parts)
+    else:
+        # Check if there are numbers at the end, and insert "-con" before the dot
+        index_dot = host.rfind('.')
+        if index_dot != -1 and host[index_dot+1:].isdigit():
+            return f"{host[:index_dot]}-con{host[index_dot:]}"
+        else:
+            return f"{host}-con"
+
+# Import groupby from itertools
+from itertools import groupby
+
 if __name__ == "__main__":
     # Set up the argument parser
     parser = argparse.ArgumentParser(description="Ping a domain and optionally the console of a host.")
@@ -52,5 +73,7 @@ if __name__ == "__main__":
     if args.console:
         # Use the provided console argument
         console_host = args.console
+        # Add the "-con" prefix after the numbers in the middle of the console host
+        console_host_with_prefix = add_console_prefix_in_middle(console_host)
         # Ping the console of the specified host
-        ping_console_host(console_host)
+        ping_console_host(console_host_with_prefix)
