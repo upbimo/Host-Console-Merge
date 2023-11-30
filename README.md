@@ -1,4 +1,10 @@
 # Host-Console-Merge Python Script
+
+
+## Windows ##
+
+
+
 # This script is designed to gather information about hosts and consoles in a Python environment.
 
 # Usage Example:
