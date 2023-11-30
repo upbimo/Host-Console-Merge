@@ -1,6 +1,7 @@
 import os
 import socket
 import argparse
+from itertools import groupby
 
 # Function to ping a domain
 def ping_domain(domain):
@@ -16,12 +17,18 @@ def ping_domain(domain):
 # Function to ping the console of a host
 def ping_console_host(host):
     try:
+        # Use the 'ping' command to check the reachability of the host
+        response_host = os.system(f"ping {host}")
+        if response_host != 0:
+            print(f"{host} is not reachable.")
+            return
+
         # Use the 'ping' command to check the reachability of the console
-        response = os.system(f"ping {host}")
-        if response == 0:
+        response_console = os.system(f"ping {host}")
+        if response_console == 0:
             print(f"Console of {host} is reachable.")
         else:
-            print(f"Unable to reach the console of {host}.")
+            print(f"Console of {host} is not reachable.")
     except Exception as e:
         # Handle any errors that may occur during console ping
         print(f"An error occurred while pinging console of {host}. Error: {e}")
@@ -44,9 +51,6 @@ def add_console_prefix_in_middle(host):
         else:
             return f"{host}-con"
 
-# Import groupby from itertools
-from itertools import groupby
-
 if __name__ == "__main__":
     # Set up the argument parser
     parser = argparse.ArgumentParser(description="Ping a domain and optionally the console of a host.")
@@ -65,13 +69,18 @@ if __name__ == "__main__":
         ping_domain(domain_to_ping)
     else:
         # Use the provided domain or console argument
-        domain_to_ping = args.domain
-        # Ping the domain
-        ping_domain(domain_to_ping)
+        host_to_ping = args.domain or args.console
+        # Ping the domain or console
+        if args.domain:
+            ping_domain(host_to_ping)
+        else:
+            # Add the "-con" prefix after the numbers in the middle of the console host
+            console_host_with_prefix = add_console_prefix_in_middle(host_to_ping)
+            # Ping the console of the specified host
+            ping_console_host(console_host_with_prefix)
 
-    # Check if the console argument is provided
+    # Additional section to ping console after host
     if args.console:
-        # Use the provided console argument
         console_host = args.console
         # Add the "-con" prefix after the numbers in the middle of the console host
         console_host_with_prefix = add_console_prefix_in_middle(console_host)
