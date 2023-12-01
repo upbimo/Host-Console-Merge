@@ -1,14 +1,14 @@
-import os
+import subprocess
 import socket
 
 # Function to ping a domain
 def ping_domain(domain):
     try:
         # Use the 'ping' command to check the reachability of the domain
-        response = os.system(f"ping {domain}")
+        result = subprocess.run(["ping", "-n", "4", domain], capture_output=True, text=True)
         print(f"Pinging {domain} with 32 bytes of data:")
-        print(response)
-        return response == 0  # Return True if the host is reachable, False otherwise
+        print(result.stdout)
+        return result.returncode == 0  # Return True if the host is reachable, False otherwise
     except Exception as e:
         # Handle any errors that may occur during domain ping
         print(f"An error occurred while pinging {domain}. Error: {e}")
@@ -18,10 +18,10 @@ def ping_domain(domain):
 def ping_console_host(host):
     try:
         # Use the 'ping' command to check the reachability of the console
-        response = os.system(f"ping {host}")
+        result = subprocess.run(["ping", "-n", "4", host], capture_output=True, text=True)
         print(f"Pinging {host} with 32 bytes of data:")
-        print(response)
-        return response == 0  # Return True if the console is reachable, False otherwise
+        print(result.stdout)
+        return result.returncode == 0  # Return True if the console is reachable, False otherwise
     except Exception as e:
         # Handle any errors that may occur during console ping
         print(f"An error occurred while pinging console of {host}. Error: {e}")
@@ -54,17 +54,26 @@ if __name__ == "__main__":
         # Add a newline for better readability between each set of pings
         print()
 
-    # Print overall reachability summary
+    # Print overall reachability summary with color
     if not failed_host_pings:
-        print("All hosts are reachable.")
+        if len(domains) == 1:
+            print(f"\033[92mHost {domains[0]} is reachable.\033[0m")  # Green color
+        else:
+            print("\033[92mAll hosts are reachable.\033[0m")  # Green color
     else:
-        print("Failed to reach the following hosts:")
+        print("\033[91mFailed to reach the following hosts:\033[0m")  # Red color
         for host, _ in failed_host_pings:
-            print(f"{host} (host)")
+            print(f"\033[91m{host} (host)\033[0m")
 
     if not failed_console_pings:
-        print("All consoles are reachable.")
+        if len(domains) == 1:
+            print(f"\n\033[92mConsole of {domains[0]} is reachable.\033[0m")  # Green color
+        else:
+            print("\n\033[92mAll consoles are reachable.\033[0m")  # Green color
     else:
-        print("Failed to reach the following consoles:")
+        print("\n\033[91mFailed to reach the following consoles:\033[0m")  # Red color
         for console, _ in failed_console_pings:
-            print(f"{console} (console)")
+            if "Ping request could not find host" in console:
+                print("\033[91mConsole is unreachable\033[0m")
+            else:
+                print(f"\033[91m{console} (console)\033[0m")
